@@ -57,6 +57,7 @@ from the new branch to the original repo to merge
 - The code need to be tested on dev environment. Once approved by QA, the feature branch will be merged to **`main`** branch.
 
 - In case of any bug in the feature, the developer needs to make the fixes in the feature branch and merge the fixes on dev environment. On QA signoff the feature will be merged into **`main`** branch
+
 ### Branches:
 
 **`feature` branch** of your fork would be used for current development on 
@@ -87,6 +88,15 @@ defined in the [pull request template](./pull_request_template.md)
 
 https://www.terraform.io/docs/language/syntax/style.html
 
+## Git Hooks
+
+We use [pre-commit](https://pre-commit.com/) hooks to run :-
+
+- Style checks
+- Security Scans
+- Code Quality checks before any commit. 
+
+You __have__ to install precommit on your local machine and enable the same on this repo before trying to commit any code.  
 
 ### Git Commit Messages
 We are following 

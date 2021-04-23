@@ -22,3 +22,8 @@ apply:
 
 destroy:
 	docker run -it --rm -v $(shell pwd)/src:/src -w /src  --env-file $(shell pwd)/.env hashicorp/terraform:0.15.0 destroy
+
+.PHONY: cli
+
+cli:
+	docker run -it --rm -v $(shell pwd)/src:/src -w /src  --env-file $(shell pwd)/.env --entrypoint /bin/sh hashicorp/terraform:0.15.0
