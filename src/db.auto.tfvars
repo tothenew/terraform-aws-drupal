@@ -1,2 +1,2 @@
-db-subnet-name              = "rds-subnet"
-allocated_storage           = "100"
+db-subnet-name    = "rds-subnet"
+allocated_storage = "100"
