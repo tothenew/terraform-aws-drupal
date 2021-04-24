@@ -18,4 +18,4 @@ Repository that hosts terraform code to launch drupal/magento setup in AWS cloud
 - Edit the Access Key ID, Secret Access Key, Sessiontoken (optional, required in case you are using temporary credentials. ) and Region according to the requirement.
 - To check whether the changes are correct, run the command "make plan".
 
-#### [How To Contribute(./CONTRIBUTING.md)
+### [How to Contribute](./CONTRIBUTING.md)
