@@ -1,7 +1,7 @@
 resource "aws_security_group" "rds-mysql-sg" {
   name        = "rds-mysql-sg"
   description = "rds security group"
-  vpc_id      = "vpc-1234123"
+  vpc_id      = "vpc-12345"
   ingress {
     from_port   = 3306
     to_port     = 3306
