@@ -4,7 +4,7 @@ Repository that hosts terraform code to launch drupal/magento setup in AWS cloud
 
 # Setting up local environment
 
-##Prerequisites
+## Prerequisites
 
 - GNU Make
 - Docker and Docker compose
