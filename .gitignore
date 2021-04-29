@@ -30,5 +30,5 @@ override.tf.json
 
 # Ignore environment files containing secrets for local execution of terraform
 .env
-# Ignore .vscode folder
+# Ignore .vscode folder and all the consisting files
 .vscode/
