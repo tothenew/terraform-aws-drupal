@@ -52,7 +52,7 @@ module "security_group" {
       from_port   = 22
       to_port     = 22
       protocol    = "tcp"
-      description = "HTTP"
+      description = "SSH"
       cidr_blocks = "110.235.219.9/32"
     }
   ]
