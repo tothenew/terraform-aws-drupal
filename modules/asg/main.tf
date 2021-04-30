@@ -24,7 +24,6 @@ module "vpc" {
   enable_dns_support   = true
 }
 
-
 module "security_group" {
   source = "git@github.com:terraform-aws-modules/terraform-aws-security-group.git?ref=v4.0.0"
 
