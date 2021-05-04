@@ -6,36 +6,67 @@ locals {
   }
 }
 
-module "db_default" {
+module "terraform-aws-rds-source" {
   source = "git@github.com:terraform-aws-modules/terraform-aws-rds.git?ref=v3.0.0"
 
-  identifier = "${local.name}-default"
+  identifier = "mysql-source"
 
-  create_db_option_group    = false
+  engine         = "mysql"
+  engine_version = "5.7"
+  instance_class = "db.t3.micro"
+
+  allocated_storage     = 50
+  max_allocated_storage = 100
+
+  name     = "mydb_source"
+  username = "foos"
+  password = "foobarbaz"
+  port     = 3306
+
+  parameter_group_name      = "default.mysql5.7"
   create_db_parameter_group = false
+  create_db_option_group    = false
 
-  # All available versions: http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_MySQL.html#MySQL.Concepts.VersionMgmt
-  engine               = "mysql"
-  engine_version       = "8.0.20"
-  family               = "mysql8.0" # DB parameter group
-  major_engine_version = "8.0"      # DB option group
-  instance_class       = "db.t3.large"
+  maintenance_window = "Sun:05:00-Sun:06:00"
+  backup_window      = "09:46-10:16"
 
-  allocated_storage = 20
+  backup_retention_period = 10
+  skip_final_snapshot     = true
 
-  name                   = "completeMysql"
-  username               = "complete_mysql"
-  create_random_password = true
-  random_password_length = 12
-  port                   = 3306
+  subnet_ids             = ["subnet-bcd186b2", "subnet-d7cc6ce6"]
+  vpc_security_group_ids = ["sg-476ef04a"]
+}
 
-  subnet_ids             = ["10.1.1.0/24", "10.1.0.0/24"]
-  vpc_security_group_ids = ["sg-02d4b540de296feb2"]
+module "terraform-aws-rds-read" {
+  source = "git@github.com:terraform-aws-modules/terraform-aws-rds.git?ref=v3.0.0"
 
-  maintenance_window = "Mon:00:00-Mon:03:00"
-  backup_window      = "03:00-06:00"
+  identifier = "mysql-read"
 
-  backup_retention_period = 0
+  engine         = "mysql"
+  engine_version = "5.7"
+  instance_class = "db.t3.micro"
 
-  tags = local.tags
+  allocated_storage     = 50
+  max_allocated_storage = 100
+
+  # Username and password should not be set for replicas
+  name     = "mydb_read"
+  username = null
+  password = null
+  port     = 3306
+
+  parameter_group_name      = "default.mysql5.7"
+  create_db_parameter_group = false
+  create_db_option_group    = false
+
+  maintenance_window = "Sun:05:00-Sun:06:00"
+  backup_window      = "09:46-10:16"
+
+  #for read replica
+  replicate_source_db = module.terraform-aws-rds-source.db_instance_id
+
+  backup_retention_period = 10
+  skip_final_snapshot     = true
+
+  create_db_subnet_group = false
 }
