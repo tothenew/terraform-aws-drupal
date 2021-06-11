@@ -19,8 +19,8 @@ module "terraform-aws-rds-source" {
   max_allocated_storage = 100
 
   name     = "mydb_source"
-  username = "foos"
-  password = "foobarbaz"
+  username = "drupaladmin"
+  password = "redhat22"
   port     = 3306
 
   parameter_group_name      = "default.mysql5.7"
@@ -33,8 +33,12 @@ module "terraform-aws-rds-source" {
   backup_retention_period = 10
   skip_final_snapshot     = true
 
-  subnet_ids             = ["subnet-bcd186b2", "subnet-d7cc6ce6"]
-  vpc_security_group_ids = ["sg-476ef04a"]
+  subnet_ids             = var.subnet_rds
+  vpc_security_group_ids = [var.sec_group_rds]
+}
+
+output "rds_endpoint" {
+  value = module.terraform-aws-rds-source.db_instance_endpoint
 }
 
 module "terraform-aws-rds-read" {

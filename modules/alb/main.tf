@@ -5,9 +5,9 @@ module "alb" {
 
   load_balancer_type = "application"
 
-  vpc_id          = "vpc-5bc36a26"
-  subnets         = ["subnet-800499e6", "subnet-d7cc6ce6"]
-  security_groups = ["sg-476ef04a"]
+  vpc_id          = var.vpc_alb
+  subnets         = var.subnet_alb
+  security_groups = [var.sec_group_alb]
 
   target_groups = [
     {
@@ -15,12 +15,17 @@ module "alb" {
       backend_protocol = "HTTP"
       backend_port     = 80
       target_type      = "instance"
-      targets = [
-        {
-          target_id = "i-063d2faf12dc55f37"
-          port      = 80
-        }
-      ]
+      health_check = {
+        enabled             = true
+        interval            = 110
+        path                = "/drupal"
+        port                = "traffic-port"
+        healthy_threshold   = 3
+        unhealthy_threshold = 3
+        timeout             = 100
+        protocol            = "HTTP"
+        matcher             = "200-399"
+      }
     }
   ]
 
@@ -40,4 +45,12 @@ module "alb" {
     Owner   = "pratishtha.verma@tothenew.com"
     Purpose = "gtihub project"
   }
+}
+
+output "tg" {
+  value = module.alb.target_group_arns
+}
+
+output "alb_dns" {
+  value = module.alb.lb_dns_name
 }
