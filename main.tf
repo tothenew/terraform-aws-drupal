@@ -15,10 +15,6 @@ module "asg" {
   dns_name      = module.efs.dns_name_efs
 }
 
-module "network" {
-  source = "./modules/network/"
-}
-
 module "alb" {
   source        = "./modules/alb/"
   vpc_alb       = module.network.vpc_id_all
@@ -31,10 +27,4 @@ module "efs" {
   subnet_efs    = module.network.private_sn_asg
   sec_group_efs = module.network.security_group_id_asg
   vpc_efs       = module.network.vpc_id_all
-}
-
-module "route53" {
-  source      = "./modules/route53/"
-  dns_alb     = module.alb.alb_dns
-  vpc_route53 = module.network.vpc_id_all
 }
