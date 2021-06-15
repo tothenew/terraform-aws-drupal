@@ -18,9 +18,9 @@ module "asg" {
 
 module "alb" {
   source        = "./modules/alb/"
-  vpc_alb       = module.network.vpc_id_all
-  sec_group_alb = module.network.security_group_id_asg
-  subnet_alb    = module.network.public_sn_asg
+  vpc_alb       = var.vpc_drupal_alb
+  sec_group_alb = var.sec_group_drupal_alb
+  subnet_alb    = var.subnet_drupal_alb
 }
 
 module "efs" {

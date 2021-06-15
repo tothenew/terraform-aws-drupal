@@ -18,6 +18,18 @@ variable "sec_group_drupal_asg" {
 
 }
 
+variable "vpc_drupal_alb" {
+
+}
+
+variable "sec_group_drupal_alb" {
+
+}
+
+variable "subnet_drupal_alb" {
+
+}
+
 variable "subnet_drupal_efs" {
 
 }
