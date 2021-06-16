@@ -8,12 +8,14 @@ module "db" {
 module "asg" {
   source = "./modules/asg/"
   #subnet_asg    = var.demo
+
   subnet_asg    = var.subnet_drupal_asg
   sec_group_asg = var.sec_group_drupal_asg
-  rds_point     = module.db.rds_endpoint
-  depends_on    = [module.db.rds_endpoint]
-  target_gp     = module.alb.tg
-  dns_name      = module.efs.dns_name_efs
+
+  rds_point  = module.db.rds_endpoint
+  depends_on = [module.db.rds_endpoint]
+  target_gp  = module.alb.tg
+  dns_name   = module.efs.dns_name_efs
 }
 
 module "alb" {

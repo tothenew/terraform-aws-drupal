@@ -31,7 +31,7 @@ module "aws_autoscaling_group" {
 
   image_id      = "ami-090717c950a5c34d3"
   instance_type = "t3a.medium"
-  key_name      = "pratishtha-testing"
+  key_name      = "pratishtha-drupal"
   #user_data_base64 = base64encode(local.user_data)
   user_data_base64 = base64encode(templatefile("${path.module}/userdata.sh", {
     rds_endpt = var.rds_point, efs_dns_name = var.dns_name
