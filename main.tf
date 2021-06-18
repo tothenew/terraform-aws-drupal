@@ -13,16 +13,63 @@ module "asg" {
   sec_group_asg = var.sec_group_drupal_asg
 
   rds_point  = module.db.rds_endpoint
-  depends_on = [module.db.rds_endpoint]
-  target_gp  = module.alb.tg
-  dns_name   = module.efs.dns_name_efs
+  depends_on = [module.db.rds_endpoint, module.alb]
+
+  target_gp = var.target_group_drupal != null ? var.target_group_drupal : module.alb.target_group_arns
+
+  #target_gp  = module.alb.tg
+  dns_name = module.efs.dns_name_efs
 }
 
 module "alb" {
-  source        = "./modules/alb/"
-  vpc_alb       = var.vpc_drupal_alb
-  sec_group_alb = var.sec_group_drupal_alb
-  subnet_alb    = var.subnet_drupal_alb
+  count = var.target_group_drupal == null ? 1 : 0
+
+  source = "git@github.com:terraform-aws-modules/terraform-aws-alb.git?ref=v6.0.0"
+
+  name = "demo-alb"
+
+  load_balancer_type = "application"
+
+  vpc_id          = var.vpc_drupal_alb
+  subnets         = var.subnet_drupal_alb
+  security_groups = [var.sec_group_drupal_alb]
+
+  target_groups = [
+    {
+      name             = "target-group"
+      backend_protocol = "HTTP"
+      backend_port     = 80
+      target_type      = "instance"
+      health_check = {
+        enabled             = true
+        interval            = 110
+        path                = "/drupal"
+        port                = "traffic-port"
+        healthy_threshold   = 3
+        unhealthy_threshold = 3
+        timeout             = 100
+        protocol            = "HTTP"
+        matcher             = "200-399"
+      }
+    }
+  ]
+
+  http_tcp_listeners = [
+    {
+      port               = 80
+      protocol           = "HTTP"
+      target_group_index = 0
+      action_type        = "forward"
+    }
+  ]
+
+  tags = {
+    Project = "terraform_drupal"
+    Name    = "terraform_asg_cluster"
+    BU      = "demo-testing"
+    Owner   = "pratishtha.verma@tothenew.com"
+    Purpose = "gtihub project"
+  }
 }
 
 module "efs" {

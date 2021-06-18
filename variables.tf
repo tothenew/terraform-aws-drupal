@@ -41,3 +41,14 @@ variable "sec_group_drupal_efs" {
 variable "vpc_drupal_efs" {
 
 }
+
+variable "target_group_drupal" {
+  default = null
+
+}
+
+#variable "create" {
+#  description = "Whether to create this resource or not?"
+#  type        = bool
+#  default     = true
+#}
