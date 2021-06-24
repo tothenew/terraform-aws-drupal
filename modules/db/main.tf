@@ -9,29 +9,37 @@ locals {
 module "terraform-aws-rds-source" {
   source = "git@github.com:terraform-aws-modules/terraform-aws-rds.git?ref=v3.0.0"
 
-  identifier = "mysql-source"
+  identifier = var.identifier_source
 
-  engine         = "mysql"
-  engine_version = "5.7"
-  instance_class = "db.t3.micro"
+  engine         = var.engine
+  engine_version = var.engine_version
+  instance_class = var.instance_class_source
 
-  allocated_storage     = 50
-  max_allocated_storage = 100
+  # Define the max_allocated_storage argument higher than the allocated_storage argument
+  allocated_storage     = var.allocated_storage
+  max_allocated_storage = var.max_allocated_storage
 
-  name     = "mydb_source"
-  username = "drupaladmin"
-  password = "redhat22"
-  port     = 3306
+  name     = var.name_source
+  username = var.username
+  password = var.password
+  port     = var.port
 
-  parameter_group_name      = "default.mysql5.7"
-  create_db_parameter_group = false
-  create_db_option_group    = false
+  parameter_group_name = var.parameter_group_name
 
-  maintenance_window = "Sun:05:00-Sun:06:00"
-  backup_window      = "09:46-10:16"
+  # Disable creation of parameter group - provide a parameter group or default to AWS default
+  # Create_option_group = false if parameter_group_name must already exist in AWS or using a default option group provided by AWS
+  create_db_parameter_group = var.create_db_parameter_group
 
-  backup_retention_period = 10
-  skip_final_snapshot     = true
+  # Disable creation of option group - provide an option group or default AWS default
+  create_db_option_group = var.create_db_option_group
+
+  maintenance_window = var.maintenance_window_source
+  backup_window      = var.backup_window_source
+
+  # Backups are required in order to create a replica
+  backup_retention_period = var.backup_retention_period
+  # If false is specified, a DB snapshot is created before the DB instance is deleted
+  skip_final_snapshot = var.skip_final_snapshot_source
 
   subnet_ids             = var.subnet_rds
   vpc_security_group_ids = [var.sec_group_rds]
@@ -44,33 +52,41 @@ output "rds_endpoint" {
 module "terraform-aws-rds-read" {
   source = "git@github.com:terraform-aws-modules/terraform-aws-rds.git?ref=v3.0.0"
 
-  identifier = "mysql-read"
+  identifier = var.identifier_read
 
-  engine         = "mysql"
-  engine_version = "5.7"
-  instance_class = "db.t3.micro"
+  engine         = var.engine
+  engine_version = var.engine_version
+  instance_class = var.instance_class_read
 
-  allocated_storage     = 50
-  max_allocated_storage = 100
+  # Define the max_allocated_storage argument higher than the allocated_storage argument
+  allocated_storage     = var.allocated_storage
+  max_allocated_storage = var.max_allocated_storage
 
   # Username and password should not be set for replicas
-  name     = "mydb_read"
+  name     = var.name_read
   username = null
   password = null
-  port     = 3306
+  port     = var.port
 
-  parameter_group_name      = "default.mysql5.7"
-  create_db_parameter_group = false
-  create_db_option_group    = false
+  parameter_group_name = var.parameter_group_name
 
-  maintenance_window = "Sun:05:00-Sun:06:00"
-  backup_window      = "09:46-10:16"
+  # Disable creation of parameter group - provide a parameter group or default to AWS default
+  # Create_option_group = false if parameter_group_name must already exist in AWS or using a default option group provided by AWS
+  create_db_parameter_group = var.create_db_parameter_group
+
+  # Disable creation of option group - provide an option group or default AWS default
+  create_db_option_group = var.create_db_option_group
+
+  maintenance_window = var.maintenance_window_read
+  backup_window      = var.backup_window_read
 
   #for read replica
   replicate_source_db = module.terraform-aws-rds-source.db_instance_id
 
-  backup_retention_period = 10
-  skip_final_snapshot     = true
+  backup_retention_period = var.backup_retention_period
+  # If false is specified, a DB snapshot is created before the DB instance is deleted
+  skip_final_snapshot = var.skip_final_snapshot_read
 
+  # Disable creation of subnet group - provide a subnet group
   create_db_subnet_group = false
 }
