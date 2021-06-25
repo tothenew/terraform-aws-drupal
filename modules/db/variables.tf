@@ -142,10 +142,6 @@ variable "create_db_subnet_group" {
   default     = false
 }
 
-variable "vpc_asg" {
-
-}
-
 variable "subnet_rds" {
   description = "A list of VPC subnet IDs"
   type        = list(string)

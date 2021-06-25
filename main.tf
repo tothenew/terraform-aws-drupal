@@ -1,23 +1,73 @@
-module "db" {
-  source        = "./modules/db/"
-  vpc_asg       = var.vpc_drupal
-  sec_group_rds = var.sec_group_drupal_rds
-  subnet_rds    = var.subnet_drupal_rds
-}
-
 module "asg" {
   source = "./modules/asg/"
 
-  subnet_asg    = var.subnet_drupal_asg
-  sec_group_asg = var.sec_group_drupal_asg
+  subnet_asg    = var.asg_subnet_drupal
+  sec_group_asg = var.asg_sec_group_drupal
 
   rds_point  = module.db.rds_endpoint
   depends_on = [module.db.rds_endpoint]
 
   target_gp = var.target_group_drupal != null ? var.target_group_drupal : module.alb[0].target_group_arns
 
-  #target_gp  = module.alb.tg
   dns_name = module.efs.dns_name_efs
+
+  name                      = var.asg_name
+  min_size                  = var.asg_min_size
+  max_size                  = var.asg_max_size
+  desired_capacity          = var.asg_desired_capacity
+  wait_for_capacity_timeout = var.asg_wait_for_capacity_timeout
+  health_check_type         = var.asg_health_check_type
+  lt_name                   = var.asg_lt_name
+  description               = var.asg_description
+  use_lt                    = var.asg_use_lt
+  create_lt                 = var.asg_create_lt
+  image_id                  = var.asg_image_id
+  instance_type             = var.asg_instance_type
+  key_name                  = var.asg_key_name
+  health_check_grace_period = var.asg_health_check_grace_period
+}
+
+module "db" {
+  source        = "./modules/db/"
+  sec_group_rds = var.rds_sec_group_drupal
+  subnet_rds    = var.rds_subnet_drupal
+
+  identifier_source          = var.rds_identifier_source
+  engine                     = var.rds_engine
+  engine_version             = var.rds_engine_version
+  instance_class_source      = var.rds_instance_class_source
+  allocated_storage          = var.rds_allocated_storage
+  max_allocated_storage      = var.rds_max_allocated_storage
+  name_source                = var.rds_name_source
+  username                   = var.rds_username
+  password                   = var.rds_password
+  port                       = var.rds_port
+  parameter_group_name       = var.rds_parameter_group_name
+  create_db_parameter_group  = var.rds_create_db_parameter_group
+  create_db_option_group     = var.rds_create_db_option_group
+  maintenance_window_source  = var.rds_maintenance_window_source
+  backup_window_source       = var.rds_backup_window_source
+  backup_retention_period    = var.rds_backup_retention_period
+  skip_final_snapshot_source = var.rds_skip_final_snapshot_source
+  identifier_read            = var.rds_identifier_read
+  name_read                  = var.rds_name_read
+  instance_class_read        = var.rds_instance_class_read
+  maintenance_window_read    = var.rds_maintenance_window_read
+  backup_window_read         = var.rds_backup_window_read
+  skip_final_snapshot_read   = var.rds_skip_final_snapshot_read
+  create_db_subnet_group     = var.rds_create_db_subnet_group
+}
+
+module "efs" {
+  source        = "./modules/efs/"
+  subnet_efs    = var.efs_subnet_drupal
+  sec_group_efs = var.efs_sec_group_drupal
+  vpc_efs       = var.efs_vpc_drupal
+
+  namespace = var.efs_namespace
+  stage     = var.efs_stage
+  name      = var.efs_name
+  region    = var.efs_region
 }
 
 module "alb" {
@@ -25,40 +75,40 @@ module "alb" {
 
   source = "git@github.com:terraform-aws-modules/terraform-aws-alb.git?ref=v6.0.0"
 
-  name = "demo-alb"
+  name = var.alb_name
 
-  load_balancer_type = "application"
+  load_balancer_type = var.alb_load_balancer_type
 
-  vpc_id          = var.vpc_drupal_alb
-  subnets         = var.subnet_drupal_alb
-  security_groups = [var.sec_group_drupal_alb]
+  vpc_id          = var.alb_vpc_drupal
+  subnets         = var.alb_subnet_drupal
+  security_groups = [var.alb_sec_group_drupal]
 
   target_groups = [
     {
-      name             = "target-group"
-      backend_protocol = "HTTP"
-      backend_port     = 80
-      target_type      = "instance"
+      name             = var.alb_target_groups_name
+      backend_protocol = var.alb_target_groups_backend_protocol
+      backend_port     = var.alb_target_groups_backend_port
+      target_type      = var.alb_target_groups_target_type
       health_check = {
-        enabled             = true
-        interval            = 110
-        path                = "/drupal"
-        port                = "traffic-port"
-        healthy_threshold   = 3
-        unhealthy_threshold = 3
-        timeout             = 100
-        protocol            = "HTTP"
-        matcher             = "200-399"
+        enabled             = var.alb_target_groups_health_check_enabled
+        interval            = var.alb_target_groups_health_check_interval
+        path                = var.alb_target_groups_health_check_path
+        port                = var.alb_target_groups_health_check_port
+        healthy_threshold   = var.alb_target_groups_health_check_healthy_threshold
+        unhealthy_threshold = var.alb_target_groups_health_check_unhealthy_threshold
+        timeout             = var.alb_target_groups_health_check_timeout
+        protocol            = var.alb_target_groups_health_check_protocol
+        matcher             = var.alb_target_groups_health_check_matcher
       }
     }
   ]
 
   http_tcp_listeners = [
     {
-      port               = 80
-      protocol           = "HTTP"
-      target_group_index = 0
-      action_type        = "forward"
+      port               = var.alb_target_groups_http_tcp_listeners_port
+      protocol           = var.alb_target_groups_http_tcp_listeners_protocol
+      target_group_index = var.alb_target_groups_http_tcp_listeners_target_group_index
+      action_type        = var.alb_target_groups_http_tcp_listeners_action_type
     }
   ]
 
@@ -69,11 +119,4 @@ module "alb" {
     Owner   = "pratishtha.verma@tothenew.com"
     Purpose = "gtihub project"
   }
-}
-
-module "efs" {
-  source        = "./modules/efs/"
-  subnet_efs    = var.subnet_drupal_efs
-  sec_group_efs = var.sec_group_drupal_efs
-  vpc_efs       = var.vpc_drupal_efs
 }
