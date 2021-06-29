@@ -100,6 +100,24 @@ variable "skip_final_snapshot_source" {
   default     = true
 }
 
+variable "create_db_subnet_group" {
+  description = "Whether to create a database subnet group"
+  type        = bool
+  default     = false
+}
+
+variable "subnet_rds" {
+  description = "A list of VPC subnet IDs"
+  type        = list(string)
+  default     = null
+}
+
+variable "sec_group_rds" {
+  description = "List of VPC security groups to associate"
+  type        = string
+  default     = null
+}
+
 variable "identifier_read" {
   description = "The name of the RDS instance, if omitted, Terraform will assign a random, unique identifier"
   type        = string
@@ -134,22 +152,4 @@ variable "skip_final_snapshot_read" {
   description = "Determines whether a final DB snapshot is created before the DB instance is deleted. If true is specified, no DBSnapshot is created. If false is specified, a DB snapshot is created before the DB instance is deleted, using the value from final_snapshot_identifier"
   type        = bool
   default     = true
-}
-
-variable "create_db_subnet_group" {
-  description = "Whether to create a database subnet group"
-  type        = bool
-  default     = false
-}
-
-variable "subnet_rds" {
-  description = "A list of VPC subnet IDs"
-  type        = list(string)
-  default     = null
-}
-
-variable "sec_group_rds" {
-  description = "List of VPC security groups to associate"
-  type        = string
-  default     = null
 }

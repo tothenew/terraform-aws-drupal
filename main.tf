@@ -49,12 +49,6 @@ module "db" {
   backup_window_source       = var.rds_backup_window_source
   backup_retention_period    = var.rds_backup_retention_period
   skip_final_snapshot_source = var.rds_skip_final_snapshot_source
-  identifier_read            = var.rds_identifier_read
-  name_read                  = var.rds_name_read
-  instance_class_read        = var.rds_instance_class_read
-  maintenance_window_read    = var.rds_maintenance_window_read
-  backup_window_read         = var.rds_backup_window_read
-  skip_final_snapshot_read   = var.rds_skip_final_snapshot_read
   create_db_subnet_group     = var.rds_create_db_subnet_group
 }
 
