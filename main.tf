@@ -114,3 +114,28 @@ module "alb" {
     Purpose = "gtihub project"
   }
 }
+
+resource "aws_lb_listener_rule" "host_based_routing" {
+  listener_arn = module.alb[0].http_tcp_listener_arns[0]
+  priority     = 99
+
+  action {
+    type             = "forward"
+    target_group_arn = module.alb[0].target_group_arns[0]
+  }
+
+  condition {
+    host_header {
+      values = [var.drupal_record_url]
+    }
+  }
+}
+
+resource "aws_route53_record" "demo-record" {
+  count   = var.createUpdateDNSRecord == true ? 1 : 0
+  zone_id = var.route53_hosted_zone
+  name    = var.drupal_record_url
+  type    = "CNAME"
+  ttl     = "300"
+  records = [var.route53_lb_dns_name != null ? var.route53_lb_dns_name : module.alb[0].lb_dns_name]
+}

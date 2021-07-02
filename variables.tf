@@ -182,6 +182,36 @@ variable "rds_skip_final_snapshot_source" {
   type        = bool
 }
 
+variable "rds_identifier_read" {
+  description = "The name of the RDS instance, if omitted, Terraform will assign a random, unique identifier"
+  type        = string
+}
+
+variable "rds_name_read" {
+  description = "The DB name to create. If omitted, no database is created initially"
+  type        = string
+}
+
+variable "rds_instance_class_read" {
+  description = "The instance type of the RDS instance"
+  type        = string
+}
+
+variable "rds_maintenance_window_read" {
+  description = "The window to perform maintenance in. Syntax: 'ddd:hh24:mi-ddd:hh24:mi'. Eg: 'Mon:00:00-Mon:03:00'"
+  type        = string
+}
+
+variable "rds_backup_window_read" {
+  description = "The daily time range (in UTC) during which automated backups are created if they are enabled. Example: '09:46-10:16'. Must not overlap with maintenance_window"
+  type        = string
+}
+
+variable "rds_skip_final_snapshot_read" {
+  description = "Determines whether a final DB snapshot is created before the DB instance is deleted. If true is specified, no DBSnapshot is created. If false is specified, a DB snapshot is created before the DB instance is deleted, using the value from final_snapshot_identifier"
+  type        = bool
+}
+
 variable "rds_create_db_subnet_group" {
   description = "Whether to create a database subnet group"
   type        = bool
@@ -338,10 +368,18 @@ variable "alb_target_groups_http_tcp_listeners_action_type" {
   type        = string
 }
 
-#variable "route53_lb_dns_name" {
-#  default = null
-#}
+variable "route53_lb_dns_name" {
+  default = null
+}
 
-#variable "route53_hosted_zone" {
-#  default = null
-#}
+variable "drupal_record_url" {
+
+}
+
+variable "route53_hosted_zone" {
+  default = null
+}
+
+variable "createUpdateDNSRecord" {
+
+}
