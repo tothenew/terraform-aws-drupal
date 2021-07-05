@@ -51,21 +51,21 @@ Repository that hosts terraform code to launch drupal/magento setup in AWS cloud
 - All the required ALB variables have default values except vpc, subnet and security group
 
 ## Route53 
-Scalable DNS to resolve the domain name of the drupal websites 
-All the required Route53 variables have default values 
+- Scalable DNS to resolve the domain name of the drupal websites 
+- All the required Route53 variables have default values 
 
 # Infrastructure
 
-All the variables have default values (except VPC and Security Group). 
-In case, a user does not provide values in tfvars, then the project will use default values to set up the Drupal infrastructure.
-This repository is reusable. 
-A user can set up the whole infrastructure if he wants to create the whole setup. 
-Resources like ALB and Route53 can also be passed from outside, if the user requires.
+- All the variables have default values (except VPC and Security Group). 
+- In case, a user does not provide values in tfvars, then the project will use default values to set up the Drupal infrastructure.
+- This repository is reusable. 
+- A user can set up the whole infrastructure if he wants to create the whole setup. 
+- Resources like ALB and Route53 can also be passed from outside, if the user requires.
 
 ## How to use it
 
-If the user wants to pass ALB from outside instead of creating it:
-Pass the target group arn value for target_group_drupal attribute
-Also, pass the DNS name for route53_lb_dns_name attribute, if the user wants to create a route53 record instead of passing it from outside. 
-If the user wants to pass Route53 from outside instead of creating it:
-Pass true to createUpdateDNSRecord and it also gives the value of the hosted zone to create a record inside. 
+- If the user wants to pass ALB from outside instead of creating it:
+  - Pass the target group arn value for target_group_drupal attribute
+  - Also, pass the DNS name for route53_lb_dns_name attribute, if the user wants to create a route53 record instead of passing it from outside. 
+- If the user wants to pass Route53 from outside instead of creating it:
+  - Pass true to createUpdateDNSRecord and it also gives the value of the hosted zone to create a record inside. 
