@@ -24,8 +24,7 @@ data "template_file" "fluentbit" {
 }
 
 data "template_cloudinit_config" "config" {
-  gzip          = false
-  base64_encode = true
+  gzip = false
 
   # Main cloud-config configuration file.
   part {
