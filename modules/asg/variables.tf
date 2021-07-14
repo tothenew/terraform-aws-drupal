@@ -111,3 +111,18 @@ variable "health_check_grace_period" {
   type        = number
   default     = 300
 }
+
+variable "rolearn" {
+  description = "ARN of IAM role"
+  default     = null
+}
+
+variable "installTelegrafCW" {
+  description = "Whether the user wants to install Telegraf or not"
+  type        = bool
+}
+
+variable "installFluentbitCW" {
+  description = "Whether the user wants to install Fluentbit or not"
+  type        = bool
+}

@@ -50,6 +50,9 @@ output "rds_endpoint" {
 }
 
 module "terraform-aws-rds-read" {
+
+  count = var.createRDSReadReplica == true ? 1 : 0
+
   source = "git@github.com:terraform-aws-modules/terraform-aws-rds.git?ref=v3.0.0"
 
   identifier = var.identifier_read

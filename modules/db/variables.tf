@@ -153,3 +153,8 @@ variable "skip_final_snapshot_read" {
   type        = bool
   default     = true
 }
+
+variable "createRDSReadReplica" {
+  description = "Whether the user wants to create Read Replica or not"
+  type        = bool
+}

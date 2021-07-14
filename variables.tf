@@ -1,7 +1,41 @@
+#Route53 Variables
+
+variable "drupal_record_url" {
+  description = "The URL of Route53 Record"
+  type        = string
+}
+
+variable "route53_hosted_zone" {
+  default     = null
+  description = "Zone ID of Route53 zone"
+}
+
+variable "createUpdateDNSRecord" {
+  description = "If the value is true, then create the Route53 record"
+  type        = bool
+}
+
+variable "route53_lb_dns_name" {
+  description = "The DNS name of Load Balancer"
+  default     = null
+}
+
+
 #ASG Variables
 
 variable "target_group_drupal" {
-  default = null
+  description = "The ARN of Target Group"
+  default     = null
+}
+
+variable "installTelegraf" {
+  description = "Whether the user wants to install Telegraf or not"
+  type        = bool
+}
+
+variable "installFluentbit" {
+  description = "Whether the user wants to install Fluentbit or not"
+  type        = bool
 }
 
 variable "asg_subnet_drupal" {
@@ -86,6 +120,11 @@ variable "asg_health_check_grace_period" {
 
 
 #DB Variables
+
+variable "createReadReplica" {
+  description = "Whether the user wants to create Read Replica or not"
+  type        = bool
+}
 
 variable "rds_sec_group_drupal" {
   description = "A list of VPC subnet IDs"
@@ -366,20 +405,4 @@ variable "alb_target_groups_http_tcp_listeners_target_group_index" {
 variable "alb_target_groups_http_tcp_listeners_action_type" {
   description = "The action type specified for the http tcp listeners"
   type        = string
-}
-
-variable "route53_lb_dns_name" {
-  default = null
-}
-
-variable "drupal_record_url" {
-
-}
-
-variable "route53_hosted_zone" {
-  default = null
-}
-
-variable "createUpdateDNSRecord" {
-
 }

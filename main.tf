@@ -1,11 +1,14 @@
 module "asg" {
   source = "./modules/asg/"
 
-  subnet_asg    = var.asg_subnet_drupal
-  sec_group_asg = var.asg_sec_group_drupal
+  installTelegrafCW  = var.installTelegraf
+  installFluentbitCW = var.installFluentbit
+  subnet_asg         = var.asg_subnet_drupal
+  sec_group_asg      = var.asg_sec_group_drupal
 
   rds_point  = module.db.rds_endpoint
   depends_on = [module.db.rds_endpoint]
+  rolearn    = module.asg.rolearncw
 
   target_gp = var.target_group_drupal != null ? var.target_group_drupal : module.alb[0].target_group_arns
 
@@ -28,7 +31,10 @@ module "asg" {
 }
 
 module "db" {
-  source        = "./modules/db/"
+  source = "./modules/db/"
+
+  createRDSReadReplica = var.createReadReplica
+
   sec_group_rds = var.rds_sec_group_drupal
   subnet_rds    = var.rds_subnet_drupal
 
@@ -50,6 +56,13 @@ module "db" {
   backup_retention_period    = var.rds_backup_retention_period
   skip_final_snapshot_source = var.rds_skip_final_snapshot_source
   create_db_subnet_group     = var.rds_create_db_subnet_group
+  identifier_read            = var.rds_identifier_read
+  name_read                  = var.rds_name_read
+  instance_class_read        = var.rds_instance_class_read
+  maintenance_window_read    = var.rds_maintenance_window_read
+  backup_window_read         = var.rds_backup_window_read
+  skip_final_snapshot_read   = var.rds_skip_final_snapshot_read
+
 }
 
 module "efs" {
