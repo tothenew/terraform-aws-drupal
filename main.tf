@@ -1,3 +1,4 @@
+# ASG Module
 module "asg" {
   source = "./modules/asg/"
 
@@ -30,6 +31,7 @@ module "asg" {
   health_check_grace_period = var.asg_health_check_grace_period
 }
 
+# RDS Module
 module "db" {
   source = "./modules/db/"
 
@@ -65,6 +67,7 @@ module "db" {
 
 }
 
+# EFS Module
 module "efs" {
   source        = "./modules/efs/"
   subnet_efs    = var.efs_subnet_drupal
@@ -77,6 +80,7 @@ module "efs" {
   region    = var.efs_region
 }
 
+# ALB Module
 module "alb" {
   count = var.target_group_drupal == null ? 1 : 0
 
@@ -128,6 +132,7 @@ module "alb" {
   }
 }
 
+# Host Based Routing
 resource "aws_lb_listener_rule" "host_based_routing" {
   listener_arn = module.alb[0].http_tcp_listener_arns[0]
   priority     = 99
@@ -144,6 +149,7 @@ resource "aws_lb_listener_rule" "host_based_routing" {
   }
 }
 
+# Route53 Record
 resource "aws_route53_record" "demo-record" {
   count   = var.createUpdateDNSRecord == true ? 1 : 0
   zone_id = var.route53_hosted_zone
