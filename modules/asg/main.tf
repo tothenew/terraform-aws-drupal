@@ -25,7 +25,7 @@ data "template_file" "fluentbit" {
 
 data "template_cloudinit_config" "config" {
   gzip          = false
-  base64_encode = false
+  base64_encode = true
 
   # Main cloud-config configuration file.
   part {
@@ -84,7 +84,7 @@ module "aws_autoscaling_group" {
   key_name      = var.key_name
   #user_data_base64 = base64encode(local.user_data)
 
-  user_data_base64 = base64encode(data.template_cloudinit_config.config.rendered)
+  user_data_base64 = data.template_cloudinit_config.config.rendered
 
   #base64encode(templatefile("${path.module}/userdata.sh", {
   #rds_endpt = var.rds_point, efs_dns_name = var.dns_name, role_arn = var.rolearn, installTelegrafCWMetrics = var.installTelegrafCW
