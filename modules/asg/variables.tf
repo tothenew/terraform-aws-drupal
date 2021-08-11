@@ -29,7 +29,7 @@ variable "max_size" {
 variable "desired_capacity" {
   description = "The number of Amazon EC2 instances that should be running in the autoscaling group"
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "wait_for_capacity_timeout" {
