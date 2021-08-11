@@ -1,3 +1,13 @@
+variable "db_username" {
+  description = "Username for the master DB user"
+  type        = string
+}
+
+variable "db_password" {
+  description = "Password for the master DB user. Note that this may show up in logs, and it will be stored in the state file"
+  type        = string
+}
+
 variable "name" {
   description = "Name used across the resources created"
   type        = string
@@ -61,7 +71,7 @@ variable "create_lt" {
 variable "image_id" {
   description = "The AMI from which to launch the instance"
   type        = string
-  default     = "ami-090717c950a5c34d3"
+  default     = "ami-042be016955b1914d"
 }
 
 variable "instance_type" {

@@ -2,12 +2,6 @@
 
 if [[ "${installFluentbitCWMetrics}" == "true" ]]
 then
-wget -qO - https://packages.fluentbit.io/fluentbit.key | sudo apt-key add -
-sed -i -e '$adeb https://packages.fluentbit.io/ubuntu/bionic bionic main' /etc/apt/sources.list
-apt-get update
-apt-get install td-agent-bit -y
-systemctl start td-agent-bit
-mv /etc/td-agent-bit/td-agent-bit.conf /etc/td-agent-bit/td-agent-bit.conf.default
 cat <<EOF | sudo tee /etc/td-agent-bit/td-agent-bit.conf
 [SERVICE]
     flush        5

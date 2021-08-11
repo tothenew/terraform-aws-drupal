@@ -15,6 +15,9 @@ module "asg" {
 
   dns_name = module.efs.dns_name_efs
 
+  db_username = var.rds_username
+  db_password = module.db.rds_password
+
   name                      = var.asg_name
   min_size                  = var.asg_min_size
   max_size                  = var.asg_max_size
@@ -48,7 +51,6 @@ module "db" {
   max_allocated_storage      = var.rds_max_allocated_storage
   name_source                = var.rds_name_source
   username                   = var.rds_username
-  password                   = var.rds_password
   port                       = var.rds_port
   parameter_group_name       = var.rds_parameter_group_name
   create_db_parameter_group  = var.rds_create_db_parameter_group

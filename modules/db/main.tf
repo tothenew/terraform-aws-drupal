@@ -6,6 +6,41 @@ locals {
   }
 }
 
+resource "random_password" "rds_master_password" {
+  length           = 8
+  number           = false
+  special          = true
+  override_special = "_%@"
+}
+
+module "secrets_manager" {
+  source = "lgallard/secrets-manager/aws"
+
+  secrets = [
+   {
+      name        = "secret-kv-1"
+      description = "This is a key/value secret for RDS cluster"
+      secret_key_value = {
+        username = var.username
+        password = random_password.rds_master_password.result
+      }
+      recovery_window_in_days = 0
+    }
+ ]
+}
+
+data "aws_secretsmanager_secret" "rds_master_arn" {
+  arn = module.secrets_manager.secret_arns[0]
+}
+
+data "aws_secretsmanager_secret_version" "rds_master_creds" {
+  secret_id = data.aws_secretsmanager_secret.rds_master_arn.id
+}
+
+output "rds_password" {
+  value = jsondecode(data.aws_secretsmanager_secret_version.rds_master_creds.secret_string)["password"]
+}
+
 module "terraform-aws-rds-source" {
   source = "git@github.com:terraform-aws-modules/terraform-aws-rds.git?ref=v3.0.0"
 
@@ -21,7 +56,8 @@ module "terraform-aws-rds-source" {
 
   name     = var.name_source
   username = var.username
-  password = var.password
+  password = jsondecode(data.aws_secretsmanager_secret_version.rds_master_creds.secret_string)["password"]
+
   port     = var.port
 
   parameter_group_name = var.parameter_group_name

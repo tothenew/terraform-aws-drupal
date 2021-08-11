@@ -46,12 +46,6 @@ variable "username" {
   default     = "drupaladmin"
 }
 
-variable "password" {
-  description = "Password for the master DB user. Note that this may show up in logs, and it will be stored in the state file"
-  type        = string
-  default     = "redhat22"
-}
-
 variable "port" {
   description = "The port on which the DB accepts connections"
   type        = string
@@ -61,7 +55,7 @@ variable "port" {
 variable "parameter_group_name" {
   description = "Name of the DB parameter group to associate or create"
   type        = string
-  default     = "default.mysql5.7"
+  default     = "drupal-pg"
 }
 
 variable "create_db_parameter_group" {

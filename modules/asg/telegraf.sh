@@ -2,9 +2,6 @@
 
 if [[ "${installTelegrafCWMetrics}" == "true" ]]
 then
-wget https://dl.influxdata.com/telegraf/releases/telegraf_1.18.2-1_amd64.deb
-dpkg -i telegraf_1.18.2-1_amd64.deb
-mv /etc/telegraf/telegraf.conf /etc/telegraf/telegraf.conf.default
 cat <<EOF | sudo tee /etc/telegraf/telegraf.conf
 [global_tags]
   StackName="my-xyz-stack"
@@ -38,7 +35,7 @@ cat <<EOF | sudo tee /etc/telegraf/telegraf.conf
 [[outputs.cloudwatch]]
   region = "us-west-2"
   role_arn = "${role_arn}"
-  namespace = "AWS/EC2_drupal_testing"
+  namespace = "AWS/EC2_aws_drupal_testing"
 EOF
 systemctl restart telegraf
 systemctl enable telegraf
