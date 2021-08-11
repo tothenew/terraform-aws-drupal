@@ -61,7 +61,7 @@ variable "port" {
 variable "parameter_group_name" {
   description = "Name of the DB parameter group to associate or create"
   type        = string
-  default     = "default.mysql5.7"
+  default     = "drupal-pg"
 }
 
 variable "create_db_parameter_group" {

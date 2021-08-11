@@ -5,9 +5,10 @@ locals {
 data "template_file" "userdata" {
   template = file("${path.module}/userdata.sh")
   vars = {
-    rds_endpt = var.rds_point, efs_dns_name = var.dns_name
+    rds_endpt = var.rds_point
   }
 }
+#efs_dns_name = var.dns_name
 
 data "template_file" "telegraf" {
   template = file("${path.module}/telegraf.sh")
@@ -192,6 +193,24 @@ resource "aws_iam_role_policy" "test_policy_fluentbit" {
           "logs:PutLogEvents"
         ],
         Resource : "*"
+      }
+    ]
+  })
+}
+
+# Role and Policy - S3 Full Access
+resource "aws_iam_role_policy" "test_policy_s3_access" {
+  name = "test_policy_s3_access"
+  role = aws_iam_role.ssm_role.id
+
+  # Terraform's "jsonencode" function converts a Terraform expression result to valid JSON syntax.
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : "s3:*",
+        "Resource" : "*"
       }
     ]
   })
