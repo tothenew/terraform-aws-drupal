@@ -2,22 +2,25 @@ locals {
   name = "demo-vpc"
 }
 
-# VPC
-
-module "vpc" {
-  source = "git@github.com:terraform-aws-modules/terraform-aws-vpc.git?ref=v3.0.0"
-
-  name = local.name
-  cidr = "10.99.0.0/18"
-
-  azs             = ["us-west-2a", "us-west-2b", "us-west-2c"]
-  public_subnets  = ["10.99.0.0/24", "10.99.1.0/24", "10.99.2.0/24"]
-  private_subnets = ["10.99.3.0/24", "10.99.4.0/24", "10.99.5.0/24"]
-
-  enable_dns_hostnames = true
-  enable_dns_support   = true
+data "aws_vpc" "default" {
+  tags = {
+    Name = "demo-vpc"
+  }
 }
 
+data "aws_subnet_ids" "public" {
+  vpc_id = data.aws_vpc.default.id
+  tags = {
+    Name = "demo-vpc-public-*"
+  }
+}
+
+data "aws_security_group" "default" {
+  vpc_id = data.aws_vpc.default.id
+  tags = {
+    Name = "remote-host"
+  }
+}
 
 # Security Group for ASG
 
@@ -25,7 +28,7 @@ module "security_group_asg" {
   source = "git@github.com:terraform-aws-modules/terraform-aws-security-group.git?ref=v4.0.0"
 
   name   = "security-group_asg"
-  vpc_id = module.vpc.vpc_id
+  vpc_id = data.aws_vpc.default.id
   egress_with_cidr_blocks = [
     {
       from_port   = 0
@@ -43,21 +46,21 @@ module "security_group_asg" {
       to_port     = 80
       protocol    = "tcp"
       description = "HTTP"
-      cidr_blocks = "205.254.162.172/32"
+      cidr_blocks = "205.254.162.44/32"
     },
     {
       from_port   = 22
       to_port     = 22
       protocol    = "tcp"
       description = "SSH"
-      cidr_blocks = "205.254.162.172/32"
+      cidr_blocks = "205.254.162.44/32"
     },
     {
       from_port   = 2049
       to_port     = 2049
       protocol    = "tcp"
       description = "NFS"
-      cidr_blocks = "205.254.162.172/32"
+      cidr_blocks = "205.254.162.44/32"
     },
     {
       from_port   = 0
@@ -71,7 +74,7 @@ module "security_group_asg" {
       to_port     = 8080
       protocol    = "tcp"
       description = "HTTP"
-      cidr_blocks = "205.254.162.172/32"
+      cidr_blocks = "205.254.162.44/32"
     }
   ]
 }
@@ -83,7 +86,7 @@ module "security_group_rds" {
   source = "git@github.com:terraform-aws-modules/terraform-aws-security-group.git?ref=v4.0.0"
 
   name   = "security-group_rds"
-  vpc_id = module.vpc.vpc_id
+  vpc_id = data.aws_vpc.default.id
   egress_with_cidr_blocks = [
     {
       from_port   = 0
@@ -100,11 +103,18 @@ module "security_group_rds" {
       to_port     = 65535
       protocol    = "tcp"
       description = "All TCP"
-      cidr_blocks = "205.254.162.172/32"
+      cidr_blocks = "205.254.162.44/32"
     }
   ]
 
   computed_ingress_with_source_security_group_id = [
+    {
+      from_port                = 3306
+      to_port                  = 3306
+      protocol                 = "tcp"
+      description              = "Added Instance SG"
+      source_security_group_id = data.aws_security_group.default.id
+    },
     {
       from_port                = 3306
       to_port                  = 3306
@@ -114,7 +124,7 @@ module "security_group_rds" {
     }
   ]
 
-  number_of_computed_ingress_with_source_security_group_id = 1
+  number_of_computed_ingress_with_source_security_group_id = 2
 }
 
 
@@ -127,8 +137,8 @@ module "test_alb" {
 
   load_balancer_type = "application"
 
-  vpc_id          = module.vpc.vpc_id
-  subnets         = module.vpc.public_subnets
+  vpc_id          = data.aws_vpc.default.id
+  subnets         = data.aws_subnet_ids.public.ids
   security_groups = [module.security_group_asg.security_group_id]
 
   target_groups = [
@@ -175,9 +185,9 @@ module "test_alb" {
 module "drupal" {
 
   # In the source, give terraform-aws-drupal git link (git@github.com:IntelliGrape/terraform-aws-drupal.git)
-  source = "../../terraform-aws-drupal/"
+  source = "../terraform-aws-drupal/"
 
-  #Route53
+  #Route53 
 
   #URL of Route53 record is passed
   drupal_record_url = var.drupal_record_url
@@ -198,7 +208,7 @@ module "drupal" {
   installTelegraf  = var.installTelegraf
   installFluentbit = var.installFluentbit
 
-  asg_subnet_drupal    = module.vpc.public_subnets
+  asg_subnet_drupal    = data.aws_subnet_ids.public.ids
   asg_sec_group_drupal = module.security_group_asg.security_group_id
 
   asg_name                      = var.asg_name
@@ -217,12 +227,12 @@ module "drupal" {
   asg_health_check_grace_period = var.asg_health_check_grace_period
 
 
-  #DB Variables
+  #DB Variables 
 
   createReadReplica = var.createReadReplica
 
   rds_sec_group_drupal = module.security_group_rds.security_group_id
-  rds_subnet_drupal    = module.vpc.public_subnets
+  rds_subnet_drupal    = data.aws_subnet_ids.public.ids
 
   rds_identifier_source          = var.rds_identifier_source
   rds_engine                     = var.rds_engine
@@ -232,7 +242,6 @@ module "drupal" {
   rds_max_allocated_storage      = var.rds_max_allocated_storage
   rds_name_source                = var.rds_name_source
   rds_username                   = var.rds_username
-  rds_password                   = var.rds_password
   rds_port                       = var.rds_port
   rds_parameter_group_name       = var.rds_parameter_group_name
   rds_create_db_parameter_group  = var.rds_create_db_parameter_group
@@ -252,8 +261,8 @@ module "drupal" {
 
   #EFS Variables
 
-  efs_vpc_drupal       = module.vpc.vpc_id
-  efs_subnet_drupal    = module.vpc.public_subnets
+  efs_vpc_drupal       = data.aws_vpc.default.id
+  efs_subnet_drupal    = data.aws_subnet_ids.public.ids
   efs_sec_group_drupal = module.security_group_asg.security_group_id
 
   efs_namespace = var.efs_namespace
@@ -264,9 +273,9 @@ module "drupal" {
 
   #ALB Variables
 
-  alb_vpc_drupal       = module.vpc.vpc_id
+  alb_vpc_drupal       = data.aws_vpc.default.id
   alb_sec_group_drupal = module.security_group_asg.security_group_id
-  alb_subnet_drupal    = module.vpc.public_subnets
+  alb_subnet_drupal    = data.aws_subnet_ids.public.ids
 
   alb_name                                                = var.alb_name
   alb_load_balancer_type                                  = var.alb_load_balancer_type
@@ -288,3 +297,4 @@ module "drupal" {
   alb_target_groups_http_tcp_listeners_target_group_index = var.alb_target_groups_http_tcp_listeners_target_group_index
   alb_target_groups_http_tcp_listeners_action_type        = var.alb_target_groups_http_tcp_listeners_action_type
 }
+

@@ -17,7 +17,7 @@ module "secrets_manager" {
   source = "lgallard/secrets-manager/aws"
 
   secrets = [
-   {
+    {
       name        = "secret-kv-1"
       description = "This is a key/value secret for RDS cluster"
       secret_key_value = {
@@ -26,7 +26,7 @@ module "secrets_manager" {
       }
       recovery_window_in_days = 0
     }
- ]
+  ]
 }
 
 data "aws_secretsmanager_secret" "rds_master_arn" {
@@ -58,7 +58,7 @@ module "terraform-aws-rds-source" {
   username = var.username
   password = jsondecode(data.aws_secretsmanager_secret_version.rds_master_creds.secret_string)["password"]
 
-  port     = var.port
+  port = var.port
 
   parameter_group_name = var.parameter_group_name
 

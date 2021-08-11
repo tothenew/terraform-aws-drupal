@@ -77,7 +77,7 @@ variable "asg_max_size" {
 variable "asg_desired_capacity" {
   description = "The number of Amazon EC2 instances that should be running in the autoscaling group"
   type        = number
-  default     = 2
+  default     = 4
 }
 
 variable "asg_wait_for_capacity_timeout" {
@@ -119,7 +119,7 @@ variable "asg_create_lt" {
 variable "asg_image_id" {
   description = "The AMI from which to launch the instance"
   type        = string
-  default     = "ami-090717c950a5c34d3"
+  default     = "ami-042be016955b1914d"
 }
 
 variable "asg_instance_type" {
@@ -209,12 +209,6 @@ variable "rds_username" {
   default     = "drupaladmin"
 }
 
-variable "rds_password" {
-  description = "Password for the master DB user. Note that this may show up in logs, and it will be stored in the state file"
-  type        = string
-  default     = "redhat22"
-}
-
 variable "rds_port" {
   description = "The port on which the DB accepts connections"
   type        = string
@@ -224,7 +218,7 @@ variable "rds_port" {
 variable "rds_parameter_group_name" {
   description = "Name of the DB parameter group to associate or create"
   type        = string
-  default     = "default.mysql5.7"
+  default     = "drupal-pg"
 }
 
 variable "rds_create_db_parameter_group" {
@@ -483,3 +477,4 @@ variable "alb_target_groups_http_tcp_listeners_action_type" {
   type        = string
   default     = "forward"
 }
+

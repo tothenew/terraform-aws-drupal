@@ -4,8 +4,8 @@ locals {
 
 resource "null_resource" "shell" {
   provisioner "local-exec" {
-      # Bootstrap script called with private_ip of each node in the cluster
-      command = <<EOT
+    # Bootstrap script called with private_ip of each node in the cluster
+    command = <<EOT
         aws s3 cp s3://demo-testing-drupal/demo.sql /home/ubuntu/demo.sql
         x=$(echo ${var.rds_point} | cut -d':' -f1)
         mysql --user=${var.db_username} --password=${var.db_password} -h $x -e "CREATE DATABASE drupal1; CREATE USER 'drupal1'@'%' IDENTIFIED BY 'drupalpass'; GRANT ALL PRIVILEGES ON drupal1.* TO 'drupal1'@'%'; FLUSH PRIVILEGES;"
@@ -15,7 +15,7 @@ resource "null_resource" "shell" {
         sed -i /home/ubuntu/demo.sql -e 's/utf8mb4_0900_ai_ci/utf8mb4_unicode_ci/g'
         mysql --user=${var.db_username} --password=${var.db_password} -h $x drupal1 < /home/ubuntu/demo.sql
       EOT
-    }
+  }
 }
 
 data "template_file" "userdata" {
@@ -221,15 +221,15 @@ resource "aws_iam_role_policy" "test_policy_s3_access" {
 
   # Terraform's "jsonencode" function converts a Terraform expression result to valid JSON syntax.
   policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": "s3:*",
-            "Resource": "*"
-        }
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : "s3:*",
+        "Resource" : "*"
+      }
     ]
- })
+  })
 }
 
 # Role and Policy - Main
