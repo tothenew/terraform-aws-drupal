@@ -1,40 +1,162 @@
-module "db" {
-  source        = "./modules/db/"
-  vpc_asg       = module.network.vpc_id_all
-  sec_group_rds = module.network.security_group_id_rds
-  subnet_rds    = module.network.public_sn_asg
-}
-
+# ASG Module
 module "asg" {
-  source        = "./modules/asg/"
-  subnet_asg    = module.network.public_sn_asg
-  sec_group_asg = module.network.security_group_id_asg
-  rds_point     = module.db.rds_endpoint
-  depends_on    = [module.db.rds_endpoint]
-  target_gp     = module.alb.tg
-  dns_name      = module.efs.dns_name_efs
+  source = "./modules/asg/"
+
+  installTelegrafCW  = var.installTelegraf
+  installFluentbitCW = var.installFluentbit
+  subnet_asg         = var.asg_subnet_drupal
+  sec_group_asg      = var.asg_sec_group_drupal
+
+  rds_point  = module.db.rds_endpoint
+  depends_on = [module.db.rds_endpoint]
+  rolearn    = module.asg.rolearncw
+
+  target_gp = var.target_group_drupal != null ? var.target_group_drupal : module.alb[0].target_group_arns
+
+  dns_name = module.efs.dns_name_efs
+
+  db_username = var.rds_username
+  db_password = module.db.rds_password
+
+  name                      = var.asg_name
+  min_size                  = var.asg_min_size
+  max_size                  = var.asg_max_size
+  desired_capacity          = var.asg_desired_capacity
+  wait_for_capacity_timeout = var.asg_wait_for_capacity_timeout
+  health_check_type         = var.asg_health_check_type
+  lt_name                   = var.asg_lt_name
+  description               = var.asg_description
+  use_lt                    = var.asg_use_lt
+  create_lt                 = var.asg_create_lt
+  image_id                  = var.asg_image_id
+  instance_type             = var.asg_instance_type
+  key_name                  = var.asg_key_name
+  health_check_grace_period = var.asg_health_check_grace_period
 }
 
-module "network" {
-  source = "./modules/network/"
+# RDS Module
+module "db" {
+  source = "./modules/db/"
+
+  createRDSReadReplica = var.createReadReplica
+
+  sec_group_rds = var.rds_sec_group_drupal
+  subnet_rds    = var.rds_subnet_drupal
+
+  identifier_source          = var.rds_identifier_source
+  engine                     = var.rds_engine
+  engine_version             = var.rds_engine_version
+  instance_class_source      = var.rds_instance_class_source
+  allocated_storage          = var.rds_allocated_storage
+  max_allocated_storage      = var.rds_max_allocated_storage
+  name_source                = var.rds_name_source
+  username                   = var.rds_username
+  port                       = var.rds_port
+  parameter_group_name       = var.rds_parameter_group_name
+  create_db_parameter_group  = var.rds_create_db_parameter_group
+  create_db_option_group     = var.rds_create_db_option_group
+  maintenance_window_source  = var.rds_maintenance_window_source
+  backup_window_source       = var.rds_backup_window_source
+  backup_retention_period    = var.rds_backup_retention_period
+  skip_final_snapshot_source = var.rds_skip_final_snapshot_source
+  create_db_subnet_group     = var.rds_create_db_subnet_group
+  identifier_read            = var.rds_identifier_read
+  name_read                  = var.rds_name_read
+  instance_class_read        = var.rds_instance_class_read
+  maintenance_window_read    = var.rds_maintenance_window_read
+  backup_window_read         = var.rds_backup_window_read
+  skip_final_snapshot_read   = var.rds_skip_final_snapshot_read
+
 }
 
-module "alb" {
-  source        = "./modules/alb/"
-  vpc_alb       = module.network.vpc_id_all
-  sec_group_alb = module.network.security_group_id_asg
-  subnet_alb    = module.network.public_sn_asg
-}
-
+# EFS Module
 module "efs" {
   source        = "./modules/efs/"
-  subnet_efs    = module.network.private_sn_asg
-  sec_group_efs = module.network.security_group_id_asg
-  vpc_efs       = module.network.vpc_id_all
+  subnet_efs    = var.efs_subnet_drupal
+  sec_group_efs = var.efs_sec_group_drupal
+  vpc_efs       = var.efs_vpc_drupal
+
+  namespace = var.efs_namespace
+  stage     = var.efs_stage
+  name      = var.efs_name
+  region    = var.efs_region
 }
 
-module "route53" {
-  source      = "./modules/route53/"
-  dns_alb     = module.alb.alb_dns
-  vpc_route53 = module.network.vpc_id_all
+# ALB Module
+module "alb" {
+  count = var.target_group_drupal == null ? 1 : 0
+
+  source = "git@github.com:terraform-aws-modules/terraform-aws-alb.git?ref=v6.0.0"
+
+  name = var.alb_name
+
+  load_balancer_type = var.alb_load_balancer_type
+
+  vpc_id          = var.alb_vpc_drupal
+  subnets         = var.alb_subnet_drupal
+  security_groups = [var.alb_sec_group_drupal]
+
+  target_groups = [
+    {
+      name             = var.alb_target_groups_name
+      backend_protocol = var.alb_target_groups_backend_protocol
+      backend_port     = var.alb_target_groups_backend_port
+      target_type      = var.alb_target_groups_target_type
+      health_check = {
+        enabled             = var.alb_target_groups_health_check_enabled
+        interval            = var.alb_target_groups_health_check_interval
+        path                = var.alb_target_groups_health_check_path
+        port                = var.alb_target_groups_health_check_port
+        healthy_threshold   = var.alb_target_groups_health_check_healthy_threshold
+        unhealthy_threshold = var.alb_target_groups_health_check_unhealthy_threshold
+        timeout             = var.alb_target_groups_health_check_timeout
+        protocol            = var.alb_target_groups_health_check_protocol
+        matcher             = var.alb_target_groups_health_check_matcher
+      }
+    }
+  ]
+
+  http_tcp_listeners = [
+    {
+      port               = var.alb_target_groups_http_tcp_listeners_port
+      protocol           = var.alb_target_groups_http_tcp_listeners_protocol
+      target_group_index = var.alb_target_groups_http_tcp_listeners_target_group_index
+      action_type        = var.alb_target_groups_http_tcp_listeners_action_type
+    }
+  ]
+
+  tags = {
+    Project = "terraform_drupal"
+    Name    = "terraform_asg_cluster"
+    BU      = "demo-testing"
+    Owner   = "pratishtha.verma@tothenew.com"
+    Purpose = "gtihub project"
+  }
+}
+
+# Host Based Routing
+resource "aws_lb_listener_rule" "host_based_routing" {
+  listener_arn = module.alb[0].http_tcp_listener_arns[0]
+  priority     = 99
+
+  action {
+    type             = "forward"
+    target_group_arn = module.alb[0].target_group_arns[0]
+  }
+
+  condition {
+    host_header {
+      values = [var.drupal_record_url]
+    }
+  }
+}
+
+# Route53 Record
+resource "aws_route53_record" "demo-record" {
+  count   = var.createUpdateDNSRecord == true ? 1 : 0
+  zone_id = var.route53_hosted_zone
+  name    = var.drupal_record_url
+  type    = "CNAME"
+  ttl     = "300"
+  records = [var.route53_lb_dns_name != null ? var.route53_lb_dns_name : module.alb[0].lb_dns_name]
 }
